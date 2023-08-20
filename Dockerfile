@@ -14,6 +14,19 @@ RUN mkdir -p ${JAR_FILE_BASEDIR} /etc/app \
   && chmod +x /docker-entrypoint.sh \
   && chown $NONPRIVUSER:$NONPRIVGROUP /var/log/app.log /var/log/app.err
 
+RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula \
+    select true | debconf-set-selections
+
+RUN echo "deb http://deb.debian.org/debian bullseye main contrib" > /etc/apt/sources.list \
+    && echo "deb http://deb.debian.org/debian bullseye-updates main contrib" >> /etc/apt/sources.list 
+    
+RUN apt-get update && apt-get install -y vim \
+ttf-mscorefonts-installer  fonts-thai-tlwg \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY fonts /usr/share/fonts/truetype/thai
+RUN fc-cache -f
+
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["--spring.config.additional-location=optional:/etc/app/"]
